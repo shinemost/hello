@@ -1,39 +1,31 @@
-use std::string;
-
 fn main() {
-    let tup = (12, "sdfd", 3.2);
-    println!("tup elements {},{},{}", tup.0, tup.1, tup.2);
-
-    println!("tup {:?}", tup);
-
-    // tup.0 = 32;
-
-    let mut tup2 = (12, "sdfd", 3.2);
-    println!("tup2 {:?}", tup2);
-    tup2.0 = 999;
-    println!("tup2 {:?}", tup2);
-
-    let mut arr = [1, 2, 33];
-    println!(
-        "arr len is {}, elemets is {},{},{}",
-        arr.len(),
-        arr[0],
-        arr[1],
-        arr[2]
-    );
-    arr[0] = 999;
-    println!("arr first element is {}", arr[0]);
-
-    let s = 32;
-    let _ss = s;
+    let s = String::from("sss");
+    let _s2 = s.to_owned();
     println!("{s}");
+    let m = dangle();
+    let n = dangle2();
+    println!("{m},{n}");
 
-    //基本类型、元组、数组复制给其他变量不会发生所有全的转移，都实现了copy
-    let _tup3 = tup;
-    println!("{:?}", tup);
+    println!("{}", first_world("hello world"));
+    println!("{}", first_world("we are the world"));
+}
 
-    //对于string 赋值给其他变量会造成所有权的转移 move
-    let m = String::from("m");
-    let n = m;
-    println!("{m}");
+fn dangle() -> String {
+    "1111".to_owned()
+}
+// 静态的生命周期 整个程序内有效
+fn dangle2() -> &'static str {
+    "2222"
+}
+
+// string 与 &str == u8集合的引用
+// 函数只有一个引用传入以及一个引用传出，即可不申明生命周期
+fn first_world(s: &str) -> &str {
+    let bytes = s.as_bytes();
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &s[0..i];
+        }
+    }
+    &s[..]
 }
