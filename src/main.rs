@@ -1,31 +1,58 @@
+/*
+ * @LastEditors: shinemost supertain147@163.com
+ * @Date: 2024-06-05 22:36:45
+ * @LastEditTime: 2024-06-09 11:12:50
+ * @FilePath: /hello/src/main.rs
+ */
 fn main() {
-    let s = String::from("sss");
-    let _s2 = s.to_owned();
-    println!("{s}");
-    let m = dangle();
-    let n = dangle2();
-    println!("{m},{n}");
-
-    println!("{}", first_world("hello world"));
-    println!("{}", first_world("we are the world"));
+    let drink = Drink {
+        flavor: Flavor::Sweet,
+        price: 6.0,
+    };
+    println!("{}", drink.price);
+    // print_drink(drink);//所有权转移
+    drink.buy();
+    let drink = Drink::new(12.0);
+    drink.buy();
 }
 
-fn dangle() -> String {
-    "1111".to_owned()
-}
-// 静态的生命周期 整个程序内有效
-fn dangle2() -> &'static str {
-    "2222"
+enum Flavor {
+    Sweet,
+    Fruity,
+    Splicy,
 }
 
-// string 与 &str == u8集合的引用
-// 函数只有一个引用传入以及一个引用传出，即可不申明生命周期
-fn first_world(s: &str) -> &str {
-    let bytes = s.as_bytes();
-    for (i, &item) in bytes.iter().enumerate() {
-        if item == b' ' {
-            return &s[0..i];
+struct Drink {
+    flavor: Flavor,
+    price: f64,
+}
+
+impl Drink {
+    // 关联变量
+    const MAX_PRICE: f64 = 10.0;
+    //方法
+    fn buy(&self) {
+        if self.price > Drink::MAX_PRICE {
+            println!("I am poor");
+            return;
+        }
+        println!("buy it");
+    }
+
+    //关联函数
+    fn new(price: f64) -> Self {
+        Drink {
+            flavor: Flavor::Fruity,
+            price,
         }
     }
-    &s[..]
+}
+// 普通函数
+fn print_drink(drink: Drink) {
+    match drink.flavor {
+        Flavor::Sweet => println!("sweet"),
+        Flavor::Splicy => println!("splicy"),
+        Flavor::Fruity => println!("fruity"),
+    }
+    println!("{}", drink.price);
 }
