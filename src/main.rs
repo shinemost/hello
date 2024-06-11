@@ -1,45 +1,66 @@
 fn main() {
-    let a = 1;
-    let b = 2;
-    let c = add(a, b);
-    println!("{c}");
-
-    let mut x = 1;
-    //只是将实参的值复制给了形参，形参的改变并不会改变实参。
-    change_i32(x);
+    let x = 1;
+    let y = String::from("hello");
+    print_i32_string(x, y);
     println!("{x}");
+    // println!("{y}");//String 默认没有实现clone与copy特质，调用函数会移交所有权，等函数调用完会直接销毁。
 
-    // 可变引用传递，指向同一个内存对象，通过解引用即可实现修改。
+    //不可变引用，不会移交所有权，也不会被修改值
+    let y = String::from("hello");
+    print_i32(&x);
+    println!("{x}");
+    print_string_borrow(&y);
+    println!("{y}");
+
+    // 可变借用，不会移交所有权，能被修改，通过*解引用
+    let mut x = 2;
+    let mut y = String::from("WORLD");
     modify_i32(&mut x);
+    modify_string(&mut y);
     println!("{x}");
+    println!("{y}");
 
-    let p = Point {
+    let mut p = Point {
         x: 1,
         y: 2,
     };
-    print_point(p);
-    println!("{:?}", p);//函数形参为结构体，默认会发生所有权的转移，除非该结构体实现Copy与Clone特质，即可改变默认行为。
+    println!("{:?}", p);
+    modify_point(&mut p);
+    println!("{:?}", p);
 }
 
-
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 struct Point {
     x: i32,
     y: i32,
 }
 
-fn add(x: i32, y: i32) -> i32 {
-    x + y
+
+fn print_i32_string(x: i32, y: String) {
+    println!("x is {x}");
+    println!("y is {y}");
 }
 
-fn change_i32(mut x: i32) {
-    x += 4;
+fn print_i32(x: &i32) {
+    println!("{}", *x);
+}
+
+fn print_string_borrow(y: &String) {
+    println!("{}", *y);
 }
 
 fn modify_i32(x: &mut i32) {
-    *x += 4;
+    (*x) += 4;
 }
 
-fn print_point(point: Point) {
-    println!("{:?}", point);
+fn modify_string(y: &mut String) {
+    *y = "00".to_string();
 }
+
+fn modify_point(p: &mut Point) {
+    (*p).x = 5;
+    (*p).y = 6;
+}
+
+
+
