@@ -1,35 +1,51 @@
-fn func_twice(f: fn(i32) -> i32, x: i32) -> i32 {
-    f(f(x))
+fn dived(x: i32, y: i32) -> Result<f64, String> {
+    if y == 0 {
+        Err("can not be zero".to_string())
+    } else {
+        let x = x as f64;
+        let y = y as f64;
+        Ok(x / y)
+    }
 }
 
-fn mute(x: i32) -> i32 {
-    x * x
+fn find_elements(v: &[i32], target: i32) -> Option<usize> {
+    for (index, element) in v.iter().enumerate() {
+        if *element == target {
+            return Some(index);
+        }
+    }
+    None
 }
 
-fn add(x: i32) -> i32 {
-    x + x
-}
 
 fn main() {
-    let x = 3;
-    let r = func_twice(mute, x);
-    println!("{r}");
+    match dived(1, 2) {
+        Ok(number) => println!("{number}"),
+        Err(msg) => println!("{msg}"),
+    };
+    match dived(1, 0) {
+        Ok(number) => println!("{number}"),
+        Err(msg) => println!("{msg}"),
+    };
 
-    let x = 10;
-    let r = func_twice(add, x);
-    println!("{r}");
+    let v = vec![1, 2, 3, 4, 5];
+    match find_elements(&v, 4) {
+        None => println!("can not found"),
+        Some(index) => println!("found in {index}"),
+    };
 
-    let v: Vec<i32> = [1, 2, 3, 4, 5, 6, 7].to_vec();
-    let map: Vec<i32> = v.iter().map(|&x| x * 2).collect();
-    println!("{:?}", map);
+    match find_elements(&v, 7) {
+        None => println!("can not found"),
+        Some(index) => println!("found in {index}"),
+    };
 
-    let v: Vec<_> = [1, 2, 3, 4, 5, 6, 7].to_vec();
-    let filter = v.iter().filter(|&x| x % 2 == 0).collect::<Vec<_>>();
-    println!("{:?}", filter);
+    // v[43];//被动引发panci
 
-    let v: Vec<_> = [1, 2, 3, 4, 5, 6, 7].to_vec();
-    let sum = v.iter().fold(0, |acc, &x| acc + x);
-    println!("{sum}");
+    panic!("主动引发panic");
+
+    //执行查看堆栈信息
+//      RUST_BACKTRACE=1 cargo run
+//      RUST_BACKTRACE=full cargo run
 }
 
 
