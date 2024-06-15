@@ -1,44 +1,26 @@
-use std::fmt::Formatter;
+fn main() {
+    let mut s = String::from("hello");
+    // 不可变引用，可以同时有多个不可变引用
+    let r1 = &s;
+    let r2 = &s;
 
-fn main() -> Result<(), Box<MyError>> {
-    match func() {
-        Err(error) => println!("{:?}", error),
-        Ok(()) => (),
+    println!("{r1},{r2}");
+    let r3 = &mut s;
+    // 可变引用具有排他性
+    println!("{r3}");
+
+    // println!("{r1},{r2}");
+
+    let result: &str;
+    {
+        // result = "world";
+        let r4 = &s;
+        result = ff(r4);
     }
-    let s = func()?;
-    println!("{:?}", s);
-    println!("oo");
-    Ok(())
+    println!("{}", result);
+    // println!("{}", r4);//出了生命周期
 }
 
-#[derive(Debug)]
-struct MyError {
-    detail: String,
+fn ff<'a>(s: &'a str) -> &'a str {
+    s
 }
-
-
-impl std::error::Error for MyError {
-    fn description(&self) -> &str {
-        &self.detail
-    }
-}
-
-impl std::fmt::Display for MyError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "MyError {}", self.detail)
-    }
-}
-
-fn func() -> Result<(), MyError> {
-    Err(MyError {
-        detail: "CustomError".to_owned(),
-    })
-    // Ok(())
-}
-
-
-
-
-
-
-
