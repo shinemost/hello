@@ -1,63 +1,31 @@
-struct MyString<'a> {
-    text: &'a str,//强烈不建议这样使用，结构体标注生命周期会很麻烦，实现方法，关联函数都要标注，看得很烦，而且容易出错，直接使用String
+/*
+ * @LastEditors: shinemost supertain147@163.com
+ * @Date: 2024-06-10 15:17:39
+ * @LastEditTime: 2024-06-16 23:17:39
+ * @FilePath: /hello/src/main.rs
+ */
+
+#[derive(Debug)]
+struct Point<T> {
+    x: T,
+    y: T,
 }
-
-impl<'a> MyString<'a> {
-    fn get_length(&self) -> usize {
-        self.text.len()
-    }
-    fn modify_text(&mut self) {
-        self.text = "world";
-    }
+// 可以指定多个泛型
+#[derive(Debug)]
+struct P<T, E> {
+    x: T,
+    y: E,
 }
-
-struct StringHolder {
-    detail: String,
-}
-
-impl StringHolder {
-    fn get_length(&self) -> usize {
-        self.detail.len()
-    }
-
-    fn get_reference(&self) -> &String {
-        &self.detail
-    }
-
-    fn get_ref<'a>(&'a self) -> &'a String {
-        &self.detail
-    }
-
-    fn modify_text(&mut self) -> &mut String {
-        &mut self.detail
-    }
-}
-
 
 fn main() {
-    let mut s = MyString {
-        text: "hello",
-    };
-    println!("{}", s.get_length());
-    s.modify_text();
-    println!("{}", s.text);
+    let p = Point { x: 1.0, y: 2.0 };
+    let p2 = Point { x: "x", y: "y" };
+    println!("{:?}", p);
+    println!("{:?}", p2);
 
-    let n = StringHolder {
-        detail: String::from("like you"),
+    let p3 = P {
+        x: 1.02,
+        y: "hello",
     };
-    println!("n: {}", n.get_length());
-    println!("n: {}", n.get_reference());
-    println!("n: {}", n.get_ref());
-
-    let mut m = StringHolder {
-        detail: String::from("like you"),
-    };
-    let mm = m.modify_text();
-    *mm = "not like you".to_owned();
-    println!("m: {}", m.get_length());
-    println!("m: {}", m.get_reference());
-    println!("m: {}", m.get_ref());
+    println!("{:?}", p3);
 }
-
-
-
