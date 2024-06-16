@@ -1,31 +1,46 @@
-/*
- * @LastEditors: shinemost supertain147@163.com
- * @Date: 2024-06-10 15:17:39
- * @LastEditTime: 2024-06-16 23:17:39
- * @FilePath: /hello/src/main.rs
- */
+fn swap<T>(x: T, y: T) -> (T, T) {
+    (y, x)
+}
 
-#[derive(Debug)]
 struct Point<T> {
     x: T,
     y: T,
 }
-// 可以指定多个泛型
-#[derive(Debug)]
-struct P<T, E> {
-    x: T,
-    y: E,
+
+impl<T> Point<T> {
+    fn new(x: T, y: T) -> Self {
+        Point { x, y }
+    }
+    // 返回引用，不用返回示例，针对基本类型和字符串等分两种情况，默认实现COPY和未显示copy的，
+    // 即存在所有权的区别。
+    fn get_reference(&self) -> (&T, &T) {
+        (&self.x, &self.y)
+    }
 }
 
 fn main() {
-    let p = Point { x: 1.0, y: 2.0 };
-    let p2 = Point { x: "x", y: "y" };
-    println!("{:?}", p);
-    println!("{:?}", p2);
+    let x = 3;
+    let y = 4;
+    let r1 = swap(x, y);
+    println!("{:?}", r1);
 
-    let p3 = P {
-        x: 1.02,
-        y: "hello",
-    };
-    println!("{:?}", p3);
+    let x = 3.01;
+    let y = 4.01;
+    let r1 = swap(x, y);
+    println!("{:?}", r1);
+
+    let ruslt = swap("hello", "world");
+    println!("{:?}", ruslt);
+
+    let i32_point = Point::new(1, 2);
+    let (x, y) = i32_point.get_reference();
+    println!("i32 point x: {},y: {}", x, y);
+
+    let f64_point = Point::new(1.2, 2.1);
+    let (x, y) = f64_point.get_reference();
+    println!(" f64 point x: {},y: {}", x, y);
+
+    let string_point = Point::new("hello".to_owned(), "world".to_string());
+    let (x, y) = string_point.get_reference();
+    println!("string point x: {},y: {}", x, y);
 }
