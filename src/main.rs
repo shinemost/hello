@@ -22,10 +22,15 @@ impl Summary for Weibo {
         format!("@{}", self.username)
     }
 }
+// 使用特征作为函数参数，限制该函数只有实现该特征的类型才能调用
+pub fn notify(item: &impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}
+
 fn main() {
     let weibo = Weibo {
         username: "sunface".to_string(),
         content: "好像微博没Tweet好用".to_string(),
     };
-    println!("{}", weibo.summarize());
+    notify(&weibo);
 }
