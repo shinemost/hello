@@ -33,4 +33,6 @@ fn main() {
         content: "好像微博没Tweet好用".to_string(),
     };
     notify(&weibo);
+    let s = "123".to_string();
+    notify(&s);
 }
