@@ -1,71 +1,39 @@
-pub trait Summary {
-    fn summarize_author(&self) -> String;
+// 返回的是对集合元素的引用，不存在生命周期的问题，就无需实现Copy的特质
+fn largest<T: PartialOrd>(list: &[T]) -> &T {
+    let mut largest = &list[0];
 
-    fn summarize(&self) -> String {
-        format!("(Read more from {}...)", self.summarize_author())
+    for item in list.iter() {
+        if item > largest {
+            largest = item;
+        }
     }
+
+    largest
 }
 
-pub struct Post {
-    pub title: String,   // 标题
-    pub author: String,  // 作者
-    pub content: String, // 内容
-}
+// 返回的是实体，要求泛型的类型必须要实现Copy的特质，否则会报错
+// cannot move out of type [T], a non-copy slice
+fn largest2<T: PartialOrd + Copy>(list: &[T]) -> T {
+    let mut largest = list[0];
 
-pub struct Weibo {
-    pub username: String,
-    pub content: String,
-}
-
-
-pub enum Test{
-    Clubs,
-    Spades,
-    Diamonds,
-    Hearts,
-}
-
-impl Summary for Test{
-    fn summarize_author(&self) ->String{
-        String::from("Test")
+    for &item in list.iter() {
+        if item > largest {
+            largest = item;
+        }
     }
-}
 
-impl Summary for Weibo {
-    fn summarize_author(&self) -> String {
-        format!("@{}", self.username)
-    }
+    largest
 }
-// 使用特征作为函数参数，限制该函数只有实现该特征的类型才能调用
-pub fn notify(item: &impl Summary) {
-    println!("Breaking news! {}", item.summarize());
-}
-
-// 函数返回值是实现了Summary特质的类型
-fn returns_summarizable() -> impl Summary {
-    // Post {
-    //     title: String::from("sunface"),
-    //     author: String::from("sunface"),
-    //     content: String::from(
-    //         "m1 max太厉害了，电脑再也不会卡",
-    //     )
-    // }
-    // Weibo{
-    //     username:String::from("weibo"),
-    //     content:String::from(
-    //                 "m2 max太厉害了，电脑再也不会卡",
-    //             )
-    // } 
-    // 也可以返回实现了该特质的枚举
-    Test::Clubs
-
-}
-
 
 fn main() {
-    let returns_summarizable = returns_summarizable();
-   let summarize = returns_summarizable.summarize_author();
-   println!("{summarize}");
+    let number_list = vec![34, 50, 25, 100, 65];
 
+    let result = largest(&number_list);
+    println!("The largest number is {}", result);
 
+    let char_list = vec!['y', 'm', 'a', 'q'];
+
+    let result = largest2(&char_list);
+    println!("The largest char is {}", result);
 }
+
