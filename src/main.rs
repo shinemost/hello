@@ -1,39 +1,40 @@
-// 返回的是对集合元素的引用，不存在生命周期的问题，就无需实现Copy的特质
-fn largest<T: PartialOrd>(list: &[T]) -> &T {
-    let mut largest = &list[0];
-
-    for item in list.iter() {
-        if item > largest {
-            largest = item;
-        }
-    }
-
-    largest
+// 通过 derive 派生特征，例如Debug,Clone有自动实现对应的默认特质代码，继承相应的功能
+#[derive(Debug)]
+pub struct Post {
+    pub title: String,   // 标题
+    pub author: String,  // 作者
+    pub content: String, // 内容
 }
 
-// 返回的是实体，要求泛型的类型必须要实现Copy的特质，否则会报错
-// cannot move out of type [T], a non-copy slice
-fn largest2<T: PartialOrd + Copy>(list: &[T]) -> T {
-    let mut largest = list[0];
+#[derive(Clone, Debug)]
+pub struct Weibo {
+    pub username: String,
+    pub content: String,
+}
 
-    for &item in list.iter() {
-        if item > largest {
-            largest = item;
-        }
-    }
-
-    largest
+#[derive(Debug)]
+pub enum Test {
+    Clubs,
+    Spades,
+    Diamonds,
+    Hearts,
 }
 
 fn main() {
-    let number_list = vec![34, 50, 25, 100, 65];
+    let post = Post {
+        title: "蓬蓬".to_string(),
+        author: "科学家".to_string(),
+        content: "官网也不是专业的".to_string(),
+    };
+    println!("{:?}", post);
+    println!("{:?}", Test::Clubs);
 
-    let result = largest(&number_list);
-    println!("The largest number is {}", result);
+    let w1 = Weibo {
+        username: "蓬蓬".to_string(),
+        content: "官网也不是专业的".to_string(),
+    };
 
-    let char_list = vec!['y', 'm', 'a', 'q'];
+    let w2 = w1.clone();
 
-    let result = largest2(&char_list);
-    println!("The largest char is {}", result);
+    println!("{:?}", w2);
 }
-
