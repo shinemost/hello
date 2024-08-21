@@ -1,40 +1,49 @@
-// 通过 derive 派生特征，例如Debug,Clone有自动实现对应的默认特质代码，继承相应的功能
-#[derive(Debug)]
-pub struct Post {
-    pub title: String,   // 标题
-    pub author: String,  // 作者
-    pub content: String, // 内容
-}
+#![allow(dead_code)]
 
-#[derive(Clone, Debug)]
-pub struct Weibo {
-    pub username: String,
-    pub content: String,
+use std::fmt;
+use std::fmt::Display;
+
+#[derive(Debug, PartialEq)]
+enum FileState {
+    Open,
+    Closed,
 }
 
 #[derive(Debug)]
-pub enum Test {
-    Clubs,
-    Spades,
-    Diamonds,
-    Hearts,
+struct File {
+    name: String,
+    data: Vec<u8>,
+    state: FileState,
+}
+
+impl Display for FileState {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            FileState::Open => write!(f, "OPEN"),
+            FileState::Closed => write!(f, "CLOSED"),
+        }
+    }
+}
+
+impl Display for File {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "<{} ({})>", self.name, self.state)
+    }
+}
+
+impl File {
+    fn new(name: &str) -> File {
+        File {
+            name: String::from(name),
+            data: Vec::new(),
+            state: FileState::Closed,
+        }
+    }
 }
 
 fn main() {
-    let post = Post {
-        title: "蓬蓬".to_string(),
-        author: "科学家".to_string(),
-        content: "官网也不是专业的".to_string(),
-    };
-    println!("{:?}", post);
-    println!("{:?}", Test::Clubs);
-
-    let w1 = Weibo {
-        username: "蓬蓬".to_string(),
-        content: "官网也不是专业的".to_string(),
-    };
-
-    let w2 = w1.clone();
-
-    println!("{:?}", w2);
+    let f6 = File::new("f6.txt");
+    //...
+    println!("{:?}", f6);
+    println!("{}", f6);
 }
