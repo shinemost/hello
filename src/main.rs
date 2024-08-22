@@ -1,19 +1,41 @@
-trait Draw {
-    fn draw(&self) -> Self;
+use std::ops::Add;
+
+#[derive(Debug, PartialEq)]
+struct Point {
+    x: i32,
+    y: i32,
 }
 
-#[derive(Clone)]
-struct Button;
+// 由于Add 特征的定义是默认泛型参数是自己，pub trait Add<Rhs = Self>
+// 因此如果是同类型相加则可直接不需要定义泛型类型
+impl Add for Point {
+    type Output = Point;
 
-// self 指代当前的实例对象
-// Self 指代Button类型，是类型的别名
-impl Draw for Button {
-    fn draw(&self) -> Self {
-        return self.clone();
+    fn add(self, other: Point) -> Point {
+        Point {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+#[derive(Debug, PartialEq)]
+struct Millimeters(u32);
+struct Meters(u32);
+
+// 而此实现则是不同类型相加的逻辑，则必须定义泛型的类型
+impl Add<Meters> for Millimeters {
+    type Output = Millimeters;
+
+    fn add(self, other: Meters) -> Millimeters {
+        Millimeters(self.0 + (other.0 * 1000))
     }
 }
 
 fn main() {
-    let button = Button;
-    let newb = button.draw();
+    assert_eq!(
+        Point { x: 1, y: 0 } + Point { x: 2, y: 3 },
+        Point { x: 3, y: 3 }
+    );
+
+    assert_eq!(Millimeters(1) + Meters(10), Millimeters(10001));
 }
