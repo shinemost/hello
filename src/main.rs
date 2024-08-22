@@ -1,31 +1,15 @@
 use std::fmt;
 
-// 特征定义中的特征约束，同步要求需要实现其他特征
-trait OutlinePrint: fmt::Display {
-    fn outline_print(&self) {
-        let output = self.to_string();
-        let len = output.len();
-        println!("{}", "*".repeat(len + 4));
-        println!("*{}*", " ".repeat(len + 2));
-        println!("* {} *", output);
-        println!("*{}*", " ".repeat(len + 2));
-        println!("{}", "*".repeat(len + 4));
-    }
-}
-struct Point {
-    x: i32,
-    y: i32,
-}
+// 使用元祖结构体，打破孤儿原则，为不在当前作用域的类型实现特质
+struct Wrapper(Vec<String>);
 
-impl fmt::Display for Point {
+impl fmt::Display for Wrapper {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({}, {})", self.x, self.y)
+        write!(f, "[{}]", self.0.join(", "))
     }
 }
-
-impl OutlinePrint for Point {}
 
 fn main() {
-    let p = Point { x: 32, y: 12 };
-    p.outline_print();
+    let w = Wrapper(vec![String::from("hello"), String::from("world")]);
+    println!("w = {}", w);
 }
