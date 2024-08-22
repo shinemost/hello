@@ -23,6 +23,8 @@ struct Millimeters(u32);
 struct Meters(u32);
 
 // 而此实现则是不同类型相加的逻辑，则必须定义泛型的类型
+// 1.减少实现的样板代码
+// 2.扩展类型但是无需大幅修改现有的代码
 impl Add<Meters> for Millimeters {
     type Output = Millimeters;
 
