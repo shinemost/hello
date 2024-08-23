@@ -1,9 +1,15 @@
 fn main() {
-    let mut v: Vec<i32> = Vec::new();
-    v.push(1);
-    assert_eq!(v, [1]);
+    let mut v = vec![1, 2, 3, 4, 5];
 
-    let mut m = vec![1, 2, 3];
-    m.push(4);
-    assert_eq!(m, [1, 2, 3, 4]);
+    // 数组下标返回的是元素的引用，可能会发生数组越界的报错
+    let third: &i32 = &v[2];
+    v.push(6);
+
+    println!("第三个元素是 {}", third);
+
+    // get返回的是option，不会报错，有返回Some，无则返回None
+    match v.get(2) {
+        Some(third) => println!("第三个元素是 {third}"),
+        None => println!("去你的第三个元素，根本没有！"),
+    }
 }
