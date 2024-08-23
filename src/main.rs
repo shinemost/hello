@@ -1,15 +1,20 @@
+// 使用枚举实现victor存储不同类型元素
+#[derive(Debug)]
+enum IpAddr {
+    V4(String),
+    V6(String),
+}
 fn main() {
-    let mut v = vec![1, 2, 3, 4, 5];
+    let v = vec![
+        IpAddr::V4("127.0.0.1".to_string()),
+        IpAddr::V6("::1".to_string()),
+    ];
 
-    // 数组下标返回的是元素的引用，可能会发生数组越界的报错
-    let third: &i32 = &v[2];
-    v.push(6);
-
-    println!("第三个元素是 {}", third);
-
-    // get返回的是option，不会报错，有返回Some，无则返回None
-    match v.get(2) {
-        Some(third) => println!("第三个元素是 {third}"),
-        None => println!("去你的第三个元素，根本没有！"),
+    for ip in v {
+        show_addr(ip)
     }
+}
+
+fn show_addr(ip: IpAddr) {
+    println!("{:?}", ip);
 }
