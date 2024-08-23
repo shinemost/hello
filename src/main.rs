@@ -1,38 +1,30 @@
+use ahash::AHashMap;
 use std::collections::HashMap;
+use std::hash::BuildHasherDefault;
+// 引入第三方的哈希函数
+use ahash::RandomState;
+use twox_hash::RandomXxHashBuilder64;
+use twox_hash::XxHash64;
 
 fn main() {
-    let mut scores = HashMap::new();
+    // 指定HashMap使用第三方的哈希函数XxHash64
+    // 每次hash使用固定种子
+    let mut hash: HashMap<_, _, BuildHasherDefault<XxHash64>> = Default::default();
+    hash.insert(42, "the answer");
+    assert_eq!(hash.get(&42), Some(&"the answer"));
 
-    scores.insert(String::from("Blue"), 10);
-    scores.insert(String::from("Yellow"), 50);
+    // 使用随机种子，每次hash都会使用随机种子，增强安全性，但是会影响性能
+    let mut hash: HashMap<_, _, RandomXxHashBuilder64> = Default::default();
+    hash.insert(42, "the answer");
+    assert_eq!(hash.get(&42), Some(&"the answer"));
 
-    let team_name = String::from("Blue");
-    let score: Option<&i32> = scores.get(&team_name);
-    match score {
-        Some(i) => println!("{i}"),
-        None => println!("没有值"),
-    }
+    // 使用ahash 性能非常好，但是不保证密码学安全
+    // https://github.com/tkaitchuck/ahash
+    let mut map: HashMap<i32, i32, RandomState> = HashMap::default();
+    map.insert(12, 34);
 
-    let score: i32 = scores.get(&team_name).copied().unwrap_or(0);
-    println!("{score}");
-
-    let mut scores = HashMap::new();
-
-    scores.insert("Blue", 10);
-
-    // 覆盖已有的值
-    let old = scores.insert("Blue", 20);
-    assert_eq!(old, Some(10));
-
-    // 查询新插入的值
-    let new = scores.get("Blue");
-    assert_eq!(new, Some(&20));
-
-    // 查询Yellow对应的值，若不存在则插入新值
-    let v = scores.entry("Yellow").or_insert(5);
-    assert_eq!(*v, 5); // 不存在，插入5
-
-    // 查询Yellow对应的值，若不存在则插入新值
-    let v = scores.entry("Yellow").or_insert(50);
-    assert_eq!(*v, 5); // 已经存在，因此50没有插入
+    // 可直接通过该构造方法创建map
+    let mut map: AHashMap<i32, i32> = AHashMap::new();
+    map.insert(12, 34);
+    map.insert(56, 78);
 }
