@@ -1,33 +1,38 @@
 use std::collections::HashMap;
 
 fn main() {
-    // HashMap
-    let mut map = HashMap::new();
-    map.insert("first", 1);
-    map.insert("second", 2);
-    map.insert("third", 3);
-    for (k, v) in &map {
-        println!("{k},{v}");
-    }
-    // 预先分配空间，减少内存扩容
-    let map: HashMap<&str, i32> = HashMap::with_capacity(10);
-    println!("{}", map.capacity());
+    let mut scores = HashMap::new();
 
-    let teams_list = vec![
-        ("中国队".to_string(), 100),
-        ("美国队".to_string(), 10),
-        ("日本队".to_string(), 50),
-    ];
+    scores.insert(String::from("Blue"), 10);
+    scores.insert(String::from("Yellow"), 50);
 
-    // 手动遍历，手动塞值
-    let mut teams_map = HashMap::new();
-    for team in &teams_list {
-        teams_map.insert(&team.0, team.1);
+    let team_name = String::from("Blue");
+    let score: Option<&i32> = scores.get(&team_name);
+    match score {
+        Some(i) => println!("{i}"),
+        None => println!("没有值"),
     }
 
-    println!("{:?}", teams_map);
+    let score: i32 = scores.get(&team_name).copied().unwrap_or(0);
+    println!("{score}");
 
-    // 使用迭代器
-    let teams_map2: HashMap<_, _> = teams_list.into_iter().collect();
-    println!("{:?}", teams_map2);
+    let mut scores = HashMap::new();
+
+    scores.insert("Blue", 10);
+
+    // 覆盖已有的值
+    let old = scores.insert("Blue", 20);
+    assert_eq!(old, Some(10));
+
+    // 查询新插入的值
+    let new = scores.get("Blue");
+    assert_eq!(new, Some(&20));
+
+    // 查询Yellow对应的值，若不存在则插入新值
+    let v = scores.entry("Yellow").or_insert(5);
+    assert_eq!(*v, 5); // 不存在，插入5
+
+    // 查询Yellow对应的值，若不存在则插入新值
+    let v = scores.entry("Yellow").or_insert(50);
+    assert_eq!(*v, 5); // 已经存在，因此50没有插入
 }
