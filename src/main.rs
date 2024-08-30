@@ -1,17 +1,14 @@
 use std::fs::File;
-use std::io::{self, Read};
 
-fn read_username_from_file() -> Result<String, io::Error> {
-    // 这个相比于层层手动往上抛异常，也太方便了
-    // 想想java的throw
-    let mut f = File::open("hello.txt")?;
-    let mut s = String::new();
-    f.read_to_string(&mut s)?;
-    Ok(s)
+fn open_file() -> Result<File, Box<dyn std::error::Error>> {
+    // ？可以进行隐式转换，自动将std::io::Error转换成了std::error::Error
+    // 因为std::io::Error实现了std::error::Error
+    let f = File::open("hello.txt")?;
+    Ok(f)
 }
 
 fn main() {
     // 错误传播
-    let r = read_username_from_file();
+    let r = open_file();
     println!("{:?}", r);
 }
