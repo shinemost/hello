@@ -1,17 +1,26 @@
-// fn first(arr: &[i32]) -> Option<&i32> {
-// 会报错，因为如果能取到值是直接返回&i32而不是Option
-// arr.get(6)?
-// }
+fn main() {
+    // 格式化输出三大金刚：
+    // print!
+    // println!
+    // format!
+    println!("Hello");                 // => "Hello"
+    println!("Hello, {}!", "world");   // => "Hello, world!"
+    println!("The number is {}", 1);   // => "The number is 1"
+    println!("{:?}", (3, 4));          // => "(3, 4)"
+    println!("{value}", value = 4);      // => "4"
+    println!("{} {}", 1, 2);           // => "1 2"
+    println!("{:04}", 42);             // => "0042" with leading zeros
 
-fn last_char_of_first_line(text: &str) -> Option<char> {
-    text.lines().next()?.chars().last()
-}
+    print!("不换行");
+    print!("就是任性");
 
-use std::error::Error;
-use std::fs::File;
+    println!("=======");
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let f = File::open("hello.txt")?;
+    let string = format!("不成功,{}", "就成仁");
+    println!("{}", string);
 
-    Ok(())
+    //  两大护法 输出到标准错误输出 2
+    // 应该仅用于输出错误信息和进度信息，其他场景都应使用println!
+    eprint!("{}", "出错了");
+    eprintln!("{}", "world都不行了");
 }
