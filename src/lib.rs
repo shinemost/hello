@@ -18,7 +18,19 @@ impl Config {
         let query = args[1].clone();
         let file_path = args[2].clone();
 
-        let ignore_case = env::var("IGNORE_CASE").is_ok();
+        let ignore_case = match env::var("IGNORE_CASE") {
+            Ok(flag) => match flag.as_str() {
+                "0" => false,
+                _ => true,
+            },
+            Err(_) => match args.get(3) {
+                Some(arg) => match arg.as_str() {
+                    "ig" | "igc" | "ignore" | "ignorecase" | "ignore_case" => true,
+                    _ => false,
+                },
+                None => false,
+            },
+        };
 
         Ok(Config {
             query,
