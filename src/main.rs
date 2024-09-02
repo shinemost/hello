@@ -1,17 +1,22 @@
-// fn first(arr: &[i32]) -> Option<&i32> {
-// 会报错，因为如果能取到值是直接返回&i32而不是Option
-// arr.get(6)?
-// }
+use hello::Config;
+use std::env;
+use std::process;
 
-fn last_char_of_first_line(text: &str) -> Option<char> {
-    text.lines().next()?.chars().last()
-}
+fn main() {
+    // --snip--
+    let args: Vec<String> = env::args().collect();
 
-use std::error::Error;
-use std::fs::File;
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
 
-fn main() -> Result<(), Box<dyn Error>> {
-    let f = File::open("hello.txt")?;
+    println!("Searching for {}", config.query);
+    println!("In file {}", config.file_path);
 
-    Ok(())
+    if let Err(e) = hello::run(config) {
+        // --snip--
+        println!("Application error: {e}");
+        process::exit(1);
+    }
 }
