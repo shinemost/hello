@@ -1,26 +1,23 @@
+#![allow(unused)]
 fn main() {
-    // 格式化输出三大金刚：
-    // print!
-    // println!
-    // format!
-    println!("Hello");                 // => "Hello"
-    println!("Hello, {}!", "world");   // => "Hello, world!"
-    println!("The number is {}", 1);   // => "The number is 1"
-    println!("{:?}", (3, 4));          // => "(3, 4)"
-    println!("{value}", value = 4);      // => "4"
-    println!("{} {}", 1, 2);           // => "1 2"
-    println!("{:04}", 42);             // => "0042" with leading zeros
+    use std::collections::HashMap;
+    use std::hash::Hash;
+    fn get_default<'m, K, V>(map: &'m mut HashMap<K, V>, key: K) -> &'m mut V
+    where
+        K: Clone + Eq + Hash,
+        V: Default,
+    {
+        // 此处获取key之后，对map的可变借用就应该结束了
+        // 但是由于编译器不够智能，会扩大map的可变借用的作用域范围，直到整个match语句结束
 
-    print!("不换行");
-    print!("就是任性");
-
-    println!("=======");
-
-    let string = format!("不成功,{}", "就成仁");
-    println!("{}", string);
-
-    //  两大护法 输出到标准错误输出 2
-    // 应该仅用于输出错误信息和进度信息，其他场景都应使用println!
-    eprint!("{}", "出错了");
-    eprintln!("{}", "world都不行了");
+        match map.get_mut(&key) {
+            Some(value) => value,
+            None => {
+                // 造成在此处又发生了map的可变借用，发生报错
+                map.insert(key.clone(), V::default());
+                map.get_mut(&key).unwrap()
+            }
+        }
+    }
 }
+
