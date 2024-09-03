@@ -1,20 +1,26 @@
-fn main() {
-    let string1 = String::from("long string is long");
-    let result;
-    {
-        let string2 = String::from("xyz");
-
-        result = longest(string1.as_str(), string2.as_str());
-    } // 到这里string2生命周期也结束了
-    // result的生命周期到这里
-    // string2的生命周期也应该到这里
-    println!("The longest string is {}", result);
+// `print_refs` 有两个引用参数，它们的生命周期 `'a` 和 `'b` 至少得跟函数活得一样久
+fn print_refs<'a, 'b>(x: &'a i32, y: &'b i32) {
+    println!("x is {} and y is {}", x, y);
 }
 
-fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
-    if x.len() > y.len() {
-        x
-    } else {
-        y
-    }
+/* 让下面的代码工作 */
+fn failed_borrow<'a>() {
+    let _x: i32 = 12;
+
+    // ERROR: `_x` 活得不够久does not live long enough
+    let y: &i32 = &_x;
+
+    // 在函数内使用 `'a` 将会报错，原因是 `&_x` 的生命周期显然比 `'a` 要小
+    // 你不能将一个小的生命周期强转成大的
+}
+
+fn main() {
+    let (four, nine) = (4, 9);
+
+
+    print_refs(&four, &nine);
+    // 这里，four 和 nice 的生命周期必须要比函数 print_refs 长
+
+    failed_borrow();
+    // `failed_borrow`  没有传入任何引用去限制生命周期 `'a`，因此，此时的 `'a` 生命周期是没有任何限制的，它默认是 `'static`
 }
