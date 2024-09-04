@@ -1,26 +1,40 @@
-// `print_refs` 有两个引用参数，它们的生命周期 `'a` 和 `'b` 至少得跟函数活得一样久
-fn print_refs<'a, 'b>(x: &'a i32, y: &'b i32) {
-    println!("x is {} and y is {}", x, y);
+struct Cacher<T, E>
+where
+    T: Fn(E) -> E,
+    E: Copy,
+{
+    query: T,
+    value: Option<E>,
 }
 
-/* 让下面的代码工作 */
-fn failed_borrow<'a>() {
-    let _x: i32 = 12;
+impl<T, E> Cacher<T, E>
+where
+    T: Fn(E) -> E,
+    E: Copy,
+{
+    fn new(query: T) -> Cacher<T, E> {
+        Cacher { query, value: None }
+    }
 
-    // ERROR: `_x` 活得不够久does not live long enough
-    let y: &i32 = &_x;
-
-    // 在函数内使用 `'a` 将会报错，原因是 `&_x` 的生命周期显然比 `'a` 要小
-    // 你不能将一个小的生命周期强转成大的
+    fn value(&mut self, arg: E) -> E {
+        match self.value {
+            Some(v) => v,
+            None => {
+                let v = (self.query)(arg);
+                self.value = Some(v);
+                v
+            }
+        }
+    }
 }
+fn main() {}
 
-fn main() {
-    let (four, nine) = (4, 9);
+#[test]
+fn call_with_different_values() {
+    let mut c = Cacher::new(|a| a);
 
+    let v1 = c.value(1);
+    let v2 = c.value(2);
 
-    print_refs(&four, &nine);
-    // 这里，four 和 nice 的生命周期必须要比函数 print_refs 长
-
-    failed_borrow();
-    // `failed_borrow`  没有传入任何引用去限制生命周期 `'a`，因此，此时的 `'a` 生命周期是没有任何限制的，它默认是 `'static`
+    assert_eq!(v2, 1);
 }
