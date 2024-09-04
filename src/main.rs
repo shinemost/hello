@@ -1,24 +1,19 @@
-use std::thread;
-fn fn_once<F>(func: F)
-where
-    // FnOnce会转移所有权
-    // F: FnOnce(usize) -> bool,
-    F: FnOnce(usize) -> bool + Copy, // 改动在这里，调用时使用的将是它的拷贝，所以并没有发生所有权的转移。
-{
-    println!("{}", func(3));
-    // 所有权已经转移，发生再次调用会报错
-    println!("{}", func(4));
+fn main() {
+  let mut s = String::new();
+
+  // 想要在闭包内部捕获可变借用，需要把该闭包声明为可变类型
+  // let mut update_string = |str| s.push_str(str);
+
+  // 只要闭包捕获的类型都实现了Copy特征的话，这个闭包就会默认实现Copy特征
+  let update_string = |str| s.push_str(str);
+  exec(update_string);
+
+  // update_string("hello");
+
+  println!("{:?}", s);
 }
 
-fn main() {
-    let x = vec![1, 2, 3];
-    fn_once(|z| z == x.len());
-
-    let v = vec![1, 2, 3];
-    let handle = thread::spawn(move || {
-        println!("Here's a vector: {:?}", v);
-    });
-    handle.join().unwrap();
-    // v 所有权已经被闭包获取了
-    println!("{:?}", v);
+// 声明闭包实现了FnMut特征，可变类型闭包
+fn exec<'a, F: FnMut(&'a str)>(mut f: F) {
+  f("hello")
 }
