@@ -1,31 +1,28 @@
-// fn main() {
-//     let mut s = String::new();
-
-//     // 闭包实现了FnMut 因为对s进行了可变引用
-//     let update_string = |str| s.push_str(str);
-
-//     exec(update_string);
-
-//     println!("{:?}", s);
-// }
-
-// // 而函数定义确是Fn 不可变引用，不匹配报错
-// fn exec<'a, F: Fn(&'a str)>(mut f: F) {
-//     f("hello")
-// }
-
 fn main() {
-  let s = "hello ".to_string();
+  let s = String::new();
 
-  // 闭包只是对s进行了不可变引用
-  let update_string = |str| println!("{},{}", s, str);
+  let update_string = || println!("{}", s);
 
   exec(update_string);
-
-  println!("{:?}", s);
+  exec1(update_string);
+  exec2(update_string);
 }
 
-// 而函数定义确是Fn 不可变引用，不匹配报错
-fn exec<'a, F: Fn(String)>(f: F) {
-  f("world".to_string())
+// 三种 Fn 的关系
+// 实际上，一个闭包并不仅仅实现某一种 Fn 特征，规则如下：
+
+// 所有的闭包都自动实现了 FnOnce 特征，因此任何一个闭包都至少可以被调用一次
+// 没有移出所捕获变量的所有权的闭包自动实现了 FnMut 特征
+// 不需要对捕获变量进行改变的闭包自动实现了 Fn 特征
+
+fn exec<F: FnOnce()>(f: F) {
+  f()
+}
+
+fn exec1<F: FnMut()>(mut f: F) {
+  f()
+}
+
+fn exec2<F: Fn()>(f: F) {
+  f()
 }
