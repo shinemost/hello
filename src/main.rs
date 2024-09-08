@@ -1,58 +1,20 @@
-mod lib;
-
 fn main() {
-    let mut counter = Counter::new();
+    // 数组，且是在编译时已知长度，所以可以实现在栈上，同时也有 Copy 特征。而 Vec 则都是存储在堆上的。
+    let names = vec!["sunface", "sunfei"];
+    let ages = [18, 18];
+    // 两个 names 的地址都一样，指向同一个引用。
+    println!("{:?} {:?}", names.as_ptr(), ages.as_ptr());
+    // 在这里 names 会发生 move
+    let names2 = names;
+    let ages2 = ages;
+    // println!("{:?} {:?}", names.as_ptr(), ages.as_ptr());
+    // 两个 ages 的地址不一样，为 copy
+    println!("{:?} {:?}", names2.as_ptr(), ages2.as_ptr())
 
-    assert_eq!(counter.next(), Some(1));
-    assert_eq!(counter.next(), Some(2));
-    assert_eq!(counter.next(), Some(3));
-    assert_eq!(counter.next(), Some(4));
-    assert_eq!(counter.next(), Some(5));
-    assert_eq!(counter.next(), None);
-
-    let sum: u32 = Counter::new()
-        .zip(Counter::new().skip(1))
-        .map(|(a, b)| a * b)
-        .filter(|x| x % 3 == 0)
-        .sum();
-    assert_eq!(18, sum);
-
-    // enumerate是迭代器消费者，会返回一个新的迭代器，元素是索引，值的元祖
-    let v = vec![1u64, 2, 3, 4, 5, 6];
-    let val = v.iter()
-        .enumerate()
-        // 每两个元素剔除一个
-        // [1, 3, 5]
-        .filter(|&(idx, _)| idx % 2 == 0)
-        .map(|(_, val)| val)
-        // 累加 1+3+5 = 9
-        .fold(0u64, |sum, acm| sum + acm);
-
-    println!("{}", val);
+    //     所以才会出现在迭代器into_iterator方法调用后数组和vec的不同
 }
 
-struct Counter {
-    count: u32,
-}
 
-impl Counter {
-    fn new() -> Counter {
-        Counter { count: 0 }
-    }
-}
-
-impl Iterator for Counter {
-    type Item = u32;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.count < 5 {
-            self.count += 1;
-            Some(self.count)
-        } else {
-            None
-        }
-    }
-}
 
 
 
