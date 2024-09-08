@@ -1,17 +1,40 @@
 fn main() {
-    // 数组，且是在编译时已知长度，所以可以实现在栈上，同时也有 Copy 特征。而 Vec 则都是存储在堆上的。
-    let names = vec!["sunface", "sunfei"];
-    let ages = [18, 18];
-    // 两个 names 的地址都一样，指向同一个引用。
-    println!("{:?} {:?}", names.as_ptr(), ages.as_ptr());
-    // 在这里 names 会发生 move
-    let names2 = names;
-    let ages2 = ages;
-    // println!("{:?} {:?}", names.as_ptr(), ages.as_ptr());
-    // 两个 ages 的地址不一样，为 copy
-    println!("{:?} {:?}", names2.as_ptr(), ages2.as_ptr())
+    let a: i32 = 10;
+    let b: u16 = 100;
 
-    //     所以才会出现在迭代器into_iterator方法调用后数组和vec的不同
+    if a < b as i32 {
+        println!("Ten is less than one hundred.");
+    }
+
+
+    let mut values: [i32; 2] = [1, 2];
+    let p1: *mut i32 = values.as_mut_ptr();
+    let first_address = p1 as usize; // 将p1内存地址转换为一个整数
+    let second_address = first_address + 4; // 4 == std::mem::size_of::<i32>()，i32类型占用4个字节，因此将内存地址 + 4
+    let p2 = second_address as *mut i32; // 访问该地址指向的下一个整数p2
+    unsafe {
+        *p2 += 1;
+    }
+    assert_eq!(values[1], 3);
+
+    // let a: u8 = 10;
+    // let b: u16 = 1500;
+    // // try_into处理转换错误，那么可以使用 TryInto
+    // let b_: u8 = b.try_into().unwrap();
+    // 
+    // if a < b_ {
+    //     println!("Ten is less than one hundred.");
+    // }
+
+    let b: i16 = 1500;
+
+    let _b: u8 = match b.try_into() {
+        Ok(b1) => b1,
+        Err(e) => {
+            println!("{:?}", e.to_string());
+            0
+        }
+    };
 }
 
 
