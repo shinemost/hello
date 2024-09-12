@@ -1,38 +1,36 @@
 fn main() {
-    // inspect 探查，一般用于Debug程序看看是否按照预想的运行，或者打印错误日志
-    let upper_case: String = "groβe"
-        .chars()
-        .inspect(|c| println!("before: {:?}", c))
-        .flat_map(|c| c.to_uppercase())
-        .inspect(|c| println!("after: {:?}", c))
-        .collect();
-    assert_eq!(upper_case, "GROΒE");
+    // chain链接，将两个可迭代者拼接在一起
+    let v: Vec<_> = (1..4).chain([20, 30, 40]).collect();
+    assert_eq!(v, [1, 2, 3, 20, 30, 40]);
 
-    // Debug程序，此处只有偶数才能进入第二个inspect
-    let a = [1, 4, 2, 3];
-    let sum = a
-        .iter()
-        .cloned()
-        .inspect(|x| println!("about to filter: {x}"))
-        .filter(|x| x % 2 == 0)
-        .inspect(|x| println!("made it through filter: {x}"))
-        .fold(0, |sum, i| sum + i);
+    // 如果两个可迭代者是可逆向的，那么生成的迭代器也是可逆的
+    let v: Vec<_> = (1..4).chain([20, 30, 40]).rev().collect();
+    assert_eq!(v, [40, 30, 20, 3, 2, 1]);
 
-    println!("{sum}");
+    let a1 = [1, 2, 3];
+    let a2 = [4, 5, 6];
 
-    // 在丢弃error前记录日志
-    let lines = ["1", "2", "a"];
+    let mut iter = a1.iter().chain(a2.iter());
 
-    let sum: i32 = lines
-        .iter()
-        .map(|line| line.parse::<i32>())
-        .inspect(|num| {
-            if let Err(ref e) = *num {
-                println!("Parsing error: {e}");
-            }
-        })
-        .filter_map(Result::ok)
-        .sum();
+    assert_eq!(iter.next(), Some(&1));
+    assert_eq!(iter.next(), Some(&2));
+    assert_eq!(iter.next(), Some(&3));
+    assert_eq!(iter.next(), Some(&4));
+    assert_eq!(iter.next(), Some(&5));
+    assert_eq!(iter.next(), Some(&6));
+    assert_eq!(iter.next(), None);
 
-    println!("Sum: {sum}");
+    // 只要实现了IntoIterator特征的可迭代者都可以做链接，而不仅仅是迭代器
+    let s1 = &[1, 2, 3];
+    let s2 = &[4, 5, 6];
+
+    let mut iter = s1.iter().chain(s2);
+
+    assert_eq!(iter.next(), Some(&1));
+    assert_eq!(iter.next(), Some(&2));
+    assert_eq!(iter.next(), Some(&3));
+    assert_eq!(iter.next(), Some(&4));
+    assert_eq!(iter.next(), Some(&5));
+    assert_eq!(iter.next(), Some(&6));
+    assert_eq!(iter.next(), None);
 }
