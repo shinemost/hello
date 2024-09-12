@@ -5,6 +5,7 @@ fn main() {
     let pangram = a.iter().fold(String::new(), |s, w| s + w + " ");
     println!("{}", pangram);
 
+    // 需要双端迭代器的支持
     let pangram = a.iter().rfold(String::new(), |s, w| s + w + " ");
     println!("{}", pangram);
 }
