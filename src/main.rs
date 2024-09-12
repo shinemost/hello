@@ -1,13 +1,7 @@
 fn main() {
-    // 求和
-    let s: u64 = (1..=100).sum();
-    println!("{s}");
-
-    // 个数 返回的是usize
-    let s: usize = (1..=100).count();
-    println!("{s}");
-
-    // 乘积
-    let s: u64 = (1..=20).product();
-    println!("{s}");
+    // 使用fold模拟计数、求和、乘积
+    let a = [5, 4, 3, 2, 1];
+    assert_eq!(a.iter().fold(0, |n, _| n + 1), 5);
+    assert_eq!(a.iter().fold(0, |n, i| n + i), 15);
+    assert_eq!(a.iter().fold(1, |n, i| n * i), 120);
 }
