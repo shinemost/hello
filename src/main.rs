@@ -1,15 +1,30 @@
-use std::collections::HashMap;
+struct Flaky(bool);
+
+impl Iterator for Flaky {
+    type Item = &'static str;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.0 {
+            self.0 = false;
+            Some("totally the last item")
+        } else {
+            self.0 = true;
+            None
+        }
+    }
+}
 
 fn main() {
-    let mut country_major_cities = HashMap::new();
-    country_major_cities.insert("Japan", vec!["Tokyo", "Kyoto"]);
-    country_major_cities.insert("US", vec!["Portland", "Nashville"]);
-    country_major_cities.insert("Brazil", vec!["Sao Paulo", "Brasilia"]);
-    country_major_cities.insert("Kenya", vec!["Nairobi", "Mombasa"]);
+    let mut flaky = Flaky(true);
+    assert_eq!(flaky.next(), Some("totally the last item"));
+    assert_eq!(flaky.next(), None);
+    assert_eq!(flaky.next(), Some("totally the last item"));
+    assert_eq!(flaky.next(), None);
 
-    // flat_map返回任意种类的可迭代者
-    let countries = ["Japan", "US", "Brazil", "Kenya"];
-    for &city in countries.iter().flat_map(|country| &country_major_cities[country]) {
-        println!("{}", city);
-    }
+    // fuse保险丝，确保第一次返回None，后续调用都返回None
+    let mut not_flaky = Flaky(true).fuse();
+
+    assert_eq!(not_flaky.next(), Some("totally the last item"));
+    assert_eq!(not_flaky.next(), None);
+    assert_eq!(not_flaky.next(), None);
+    assert_eq!(not_flaky.next(), None);
 }
