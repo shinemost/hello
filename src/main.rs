@@ -1,7 +1,10 @@
 fn main() {
-    // 使用fold模拟计数、求和、乘积
-    let a = [5, 4, 3, 2, 1];
-    assert_eq!(a.iter().fold(0, |n, _| n + 1), 5);
-    assert_eq!(a.iter().fold(0, |n, i| n + i), 15);
-    assert_eq!(a.iter().fold(1, |n, i| n * i), 120);
+    // fold折叠 累积某种结果 给定初始值：累加器，加上闭包函数描述动作，动作结果与累加器作为下一个累加器反复调用闭包
+    // 最终累加器的值就是fold返回的结果
+    let a = ["Package", "my", "box", "with", "five", "dozen", "liquor", "jugs"];
+    let pangram = a.iter().fold(String::new(), |s, w| s + w + " ");
+    println!("{}", pangram);
+
+    let pangram = a.iter().rfold(String::new(), |s, w| s + w + " ");
+    println!("{}", pangram);
 }
