@@ -1,11 +1,10 @@
-fn main() {
-    // fold折叠 累积某种结果 给定初始值：累加器，加上闭包函数描述动作，动作结果与累加器作为下一个累加器反复调用闭包
-    // 最终累加器的值就是fold返回的结果
-    let a = ["Package", "my", "box", "with", "five", "dozen", "liquor", "jugs"];
-    let pangram = a.iter().fold(String::new(), |s, w| s + w + " ");
-    println!("{}", pangram);
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 
-    // 需要双端迭代器的支持
-    let pangram = a.iter().rfold(String::new(), |s, w| s + w + " ");
-    println!("{}", pangram);
+fn main() {
+    let mut rng = thread_rng();
+    let mut y = [1, 2, 3, 4, 5];
+    println!("Unshuffled: {:?}", y);
+    y.shuffle(&mut rng);
+    println!("Shuffled:   {:?}", y);
 }
