@@ -1,48 +1,19 @@
-struct HasDrop1;
-struct HasDrop2;
-impl Drop for HasDrop1 {
-    fn drop(&mut self) {
-        println!("Dropping HasDrop1!");
-    }
-}
-impl Drop for HasDrop2 {
-    fn drop(&mut self) {
-        println!("Dropping HasDrop2!");
-    }
-}
-struct HasTwoDrops {
-    one: HasDrop1,
-    two: HasDrop2,
-}
-// impl Drop for HasTwoDrops {
-//     fn drop(&mut self) {
-//         println!("Dropping HasTwoDrops!");
-//     }
+// fn main() {
+//     let s = String::from("hello, world");
+//     // s在这里被转移给a
+//     let a = Box::new(s);
+//     // 报错！此处继续尝试将 s 转移给 b
+//     let b = Box::new(s);
 // }
 
-#[derive(Debug)]
-struct Foo;
-
-impl Drop for Foo {
-    fn drop(&mut self) {
-        println!("Dropping Foo!")
-    }
-}
-
-// Drop特征，按照定义的顺序执行drop函数
-// Rust为几乎所有的类型实现了Drop特征，可以不定义但是会调用默认的drop实现
+use std::rc::Rc;
 fn main() {
-    let _x = HasTwoDrops {
-        two: HasDrop2,
-        one: HasDrop1,
-    };
-    // let _foo = Foo;
-    println!("Running!");
+    // Rc引用计数智能指针
+    let a = Rc::new(String::from("hello, world"));
+    // 创建了一个新的 Rc<String> 智能指针并赋给变量 a，该指针指向底层的字符串数据。
+    let b = Rc::clone(&a);
 
-    let foo = Foo;
-    // rust不允许显示的调用析构函数
-    // foo.drop();
-    // drop会拿走变量的所有权，下面println会报错
-    drop(foo);
-    // println!("Running!:{:?}", foo);
+    // Rc::strong_count返回引用计数值
+    assert_eq!(2, Rc::strong_count(&a));
+    assert_eq!(Rc::strong_count(&a), Rc::strong_count(&b))
 }
