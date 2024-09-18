@@ -1,51 +1,18 @@
-// 低于Rust 1.70版本中， OnceCell 和 SyncOnceCell 的API为实验性的 ，
-// 需启用特性 `#![feature(once_cell)]`。
-// #![feature(once_cell)]
-// use std::{lazy::SyncOnceCell, thread};
+use std::sync::{Mutex, RwLock};
 
-// Rust 1.70版本以上,
-use std::{sync::OnceLock, thread};
+// 1.63.0以上支持将Mutex::new、RwLock::new作为常量初始化定义
+const MY_MUTEX: Mutex<i32> = Mutex::new(10);
+const MY_RWLOCK: RwLock<i32> = RwLock::new(0);
 
 fn main() {
-    // 子线程中调用
-    let handle = thread::spawn(|| {
-        let logger = Logger::global();
-        logger.log("thread message".to_string());
-    });
+    // 在这里可以安全地使用 MY_MUTEX 和 MY_RWLOCK
+    let binding = MY_MUTEX;
 
-    // 主线程调用
-    let logger = Logger::global();
-    logger.log("some message".to_string());
+    let mut lock = binding.lock().unwrap();
+    *lock += 1;
+    println!("{}", *lock);
 
-    let logger2 = Logger::global();
-    logger2.log("other message".to_string());
-
-    handle.join().unwrap();
+    let binding = MY_RWLOCK;
+    let read_lock = binding.read().unwrap();
+    println!("Current value: {}", *read_lock);
 }
-
-#[derive(Debug)]
-struct Logger;
-
-// 低于Rust 1.70版本
-// static LOGGER: SyncOnceCell<Logger> = SyncOnceCell::new();
-
-// Rust 1.70版本以上
-static LOGGER: OnceLock<Logger> = OnceLock::new();
-
-impl Logger {
-    fn global() -> &'static Logger {
-        // 获取或初始化 Logger
-        LOGGER.get_or_init(|| {
-            println!("Logger is being created..."); // 初始化打印
-            Logger
-        })
-    }
-
-    fn log(&self, message: String) {
-        println!("{}", message)
-    }
-}
-
-// 编译期初始化的全局变量，const创建常量，static创建静态变量，Atomic创建原子类型
-// 运行期初始化的全局变量，lazy_static用于懒初始化，Box::leak利用内存泄漏将一个变量的生命周期变为'static
-// 使用标准库cell::OnceCell 和 sync::OnceLock 前者用于单线程，后者用于多线程，它们用来存储堆上的信息，并且具有最 多只能赋值一次的特性
