@@ -1,50 +1,28 @@
-use std::fmt;
+use std::fs::File;
+use std::io;
 
-// 加上业务错误代码
+#[derive(Debug)]
 struct AppError {
-    code: usize,
-    message: String,
+    kind: String,    // 错误类型
+    message: String, // 错误信息
 }
 
-// 根据错误码显示不同的错误信息
-impl fmt::Display for AppError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let err_msg = match self.code {
-            404 => "Sorry, Can not find the Page!",
-            _ => "Sorry, something is wrong! Please Try Again!",
-        };
-
-        write!(f, "{}", err_msg)
+// 为 AppError 实现 std::convert::From 特征，由于 From 包含在 std::prelude 中，因此可以直接简化引入。
+// 实现 From<io::Error> 意味着我们可以将 io::Error 错误转换成自定义的 AppError 错误
+impl From<io::Error> for AppError {
+    fn from(error: io::Error) -> Self {
+        AppError {
+            kind: String::from("io"),
+            message: error.to_string(),
+        }
     }
 }
 
-impl fmt::Debug for AppError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "AppError {{ code: {}, message: {} }}",
-            self.code, self.message
-        )
-    }
+fn main() -> Result<(), AppError> {
+    let _file = File::open("nonexistent_file.txt")?;
+
+    Ok(())
 }
 
-fn produce_error() -> Result<(), AppError> {
-    Err(AppError {
-        code: 404,
-        message: String::from("Page not found"),
-    })
-}
-
-fn main() {
-    match produce_error() {
-        Err(e) => eprintln!("{}", e), // 抱歉，未找到指定的页面!
-        _ => println!("No error"),
-    }
-
-    eprintln!("{:?}", produce_error()); // Err(AppError { code: 404, message: Page not found })
-
-    eprintln!("{:#?}", produce_error());
-    // Err(
-    //     AppError { code: 404, message: Page not found }
-    // )
-}
+// --------------- 上述代码运行后输出 ---------------
+// Error: AppError { kind: "io", message: "No such file or directory (os error 2)" }
