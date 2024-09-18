@@ -1,18 +1,27 @@
-use std::sync::{Mutex, RwLock};
+use std::fmt;
 
-// 1.63.0以上支持将Mutex::new、RwLock::new作为常量初始化定义
-const MY_MUTEX: Mutex<i32> = Mutex::new(10);
-const MY_RWLOCK: RwLock<i32> = RwLock::new(0);
+// AppError 是自定义错误类型，它可以是当前包中定义的任何类型，在这里为了简化，我们使用了单元结构体作为例子。
+// 为 AppError 自动派生 Debug 特征
+#[derive(Debug)]
+struct AppError;
+
+// 为 AppError 实现 std::fmt::Display 特征
+impl fmt::Display for AppError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "An Error Occurred, Please Try Again!") // user-facing output
+    }
+}
+
+// 一个示例函数用于产生 AppError 错误
+fn produce_error() -> Result<(), AppError> {
+    Err(AppError)
+}
 
 fn main() {
-    // 在这里可以安全地使用 MY_MUTEX 和 MY_RWLOCK
-    let binding = MY_MUTEX;
+    match produce_error() {
+        Err(e) => eprintln!("{}", e),
+        _ => println!("No error"),
+    }
 
-    let mut lock = binding.lock().unwrap();
-    *lock += 1;
-    println!("{}", *lock);
-
-    let binding = MY_RWLOCK;
-    let read_lock = binding.read().unwrap();
-    println!("Current value: {}", *read_lock);
+    eprintln!("{:?}", produce_error()); // Err({ file: src/main.rs, line: 17 })
 }
