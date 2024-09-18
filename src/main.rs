@@ -1,51 +1,44 @@
-// 自引用结构体
-struct SelfRef<'a> {
-    value: String,
-
-    // 该引用指向上面的value
-    pointer_to_value: &'a str,
-}
-
 #[derive(Debug)]
-struct WhatAboutThis<'a> {
-    name: String,
-    nickname: Option<&'a str>,
+struct SelfRef {
+    value: String,
+    pointer_to_value: *mut String,
 }
 
-// fn creator<'a>() -> WhatAboutThis<'a> {
-//     let mut tricky = WhatAboutThis {
-//         name: "Annabelle".to_string(),
-//         nickname: None,
-//     };
-//     tricky.nickname = Some(&tricky.name[..4]);
+impl SelfRef {
+    fn new(txt: &str) -> Self {
+        SelfRef {
+            value: String::from(txt),
+            pointer_to_value: std::ptr::null_mut(),
+        }
+    }
 
-//     tricky
-// }
-impl<'a> WhatAboutThis<'a> {
-    fn tie_the_knot(&'a mut self) {
-        self.nickname = Some(&self.name[..4]);
+    fn init(&mut self) {
+        let self_ref: *mut String = &mut self.value;
+        self.pointer_to_value = self_ref;
+    }
+
+    fn value(&self) -> &str {
+        &self.value
+    }
+
+    fn pointer_to_value(&self) -> &String {
+        assert!(
+            !self.pointer_to_value.is_null(),
+            "Test::b called without Test::init being called first"
+        );
+        unsafe { &*(self.pointer_to_value) }
     }
 }
+
 fn main() {
-    // let s = "aaa".to_string();
-    // let v = SelfRef {
-    //     value: s,
-    //     pointer_to_value: &s,
-    // };
+    let mut t = SelfRef::new("hello");
+    t.init();
+    println!("{}, {:p}", t.value(), t.pointer_to_value());
 
-    // let mut tricky = WhatAboutThis {
-    //     name: "Annabelle".to_string(),
-    //     nickname: None,
-    // };
-    // tricky.nickname = Some(&tricky.name[..4]);
+    t.value.push_str(", world");
+    unsafe {
+        (&mut *t.pointer_to_value).push_str("!");
+    }
 
-    // println!("{:?}", tricky);
-
-    let mut tricky = WhatAboutThis {
-        name: "Annabelle".to_string(),
-        nickname: None,
-    };
-    tricky.tie_the_knot();
-
-    println!("{:?}", tricky);
+    println!("{}, {:p}", t.value(), t.pointer_to_value());
 }
