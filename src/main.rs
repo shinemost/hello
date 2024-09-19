@@ -12,31 +12,10 @@ fn render() -> Result<String, MyError> {
     Ok(source)
 }
 
-#[derive(Debug)]
+#[derive(thiserror::Error, Debug)]
 enum MyError {
-    EnvironmentVariableNotFound,
-    IOError(std::io::Error),
-}
-
-impl From<std::env::VarError> for MyError {
-    fn from(_: std::env::VarError) -> Self {
-        Self::EnvironmentVariableNotFound
-    }
-}
-
-impl From<std::io::Error> for MyError {
-    fn from(value: std::io::Error) -> Self {
-        Self::IOError(value)
-    }
-}
-
-impl std::error::Error for MyError {}
-
-impl std::fmt::Display for MyError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            MyError::EnvironmentVariableNotFound => write!(f, "Environment variable not found"),
-            MyError::IOError(err) => write!(f, "IO Error: {}", err.to_string()),
-        }
-    }
+    #[error("Environment variable not found")]
+    EnvironmentVariableNotFound(#[from] std::env::VarError),
+    #[error(transparent)]
+    IOError(#[from] std::io::Error),
 }
