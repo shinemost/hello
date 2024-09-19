@@ -1,18 +1,21 @@
-use std::fs::read_to_string;
+use std::thread;
+use std::time::Duration;
 
-use anyhow::Result;
+fn main() {
+    let handle = thread::spawn(|| {
+        for i in 1..5 {
+            println!("hi number {} from the spawned thread!", i);
+            thread::sleep(Duration::from_millis(1));
+        }
+    });
 
-fn main() -> Result<()> {
-    let html = render()?;
-    println!("{}", html);
-    Ok(())
+    // main线程阻塞,等子线程执行完成后,main主线程继续执行
+    handle.join().unwrap();
+
+    for i in 1..5 {
+        println!("hi number {} from the main thread!", i);
+        thread::sleep(Duration::from_millis(1));
+    }
+    // 放在这里就是主线程与子线程交替执行
+    // handle.join().unwrap();
 }
-
-fn render() -> Result<String> {
-    let file = std::env::var("MARKDOWN")?;
-    let source = read_to_string(file)?;
-    Ok(source)
-}
-
-// 如果你想要设计自己的错误类型，同时给调用者提供具体的信息时，就使用 thiserror，例如当你在开发一个三方库代码时。
-// 如果你只想要简单，就使用 anyhow，例如在自己的应用服务中。
