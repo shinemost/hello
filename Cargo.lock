@@ -18,6 +18,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "512761e0bb2578dd7380c6baaa0f4ce03e84f95e960231d1dec8bf4d7d6e2627"
 
 [[package]]
+name = "anyhow"
+version = "1.0.89"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "86fdf8605db99b54d3cd748a44c6d04df638eb5dafb219b135d0149bd0db01f6"
+
+[[package]]
 name = "backtrace"
 version = "0.3.74"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -58,6 +64,7 @@ checksum = "32085ea23f3234fc7846555e85283ba4de91e21016dc0455a16286d87a292d64"
 name = "hello"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "error-chain",
  "lazy_static",
  "thiserror",
