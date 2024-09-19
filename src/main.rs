@@ -1,23 +1,27 @@
-use std::sync::{Arc, Barrier};
+use std::cell::RefCell;
 use std::thread;
 
+thread_local!(static FOO: RefCell<u32> = RefCell::new(1));
+
 fn main() {
-    // 类似于java里的CyclicBarrier
-    // 以及golang三方库里的CyclicBarrier
-    // https://github.com/marusama/cyclicbarrier.git
-    let mut handles = Vec::with_capacity(6);
-    let barrier = Arc::new(Barrier::new(6));
+    FOO.with(|f| {
+        assert_eq!(*f.borrow(), 1);
+        *f.borrow_mut() = 2;
+    });
 
-    for _ in 0..6 {
-        let b = barrier.clone();
-        handles.push(thread::spawn(move || {
-            println!("before wait");
-            b.wait();
-            println!("after wait");
-        }));
-    }
+    // 每个线程开始时都会拿到线程局部变量的FOO的初始值
+    let t = thread::spawn(move || {
+        FOO.with(|f| {
+            assert_eq!(*f.borrow(), 1);
+            *f.borrow_mut() = 3;
+        });
+    });
 
-    for handle in handles {
-        handle.join().unwrap();
-    }
+    // 等待线程完成
+    t.join().unwrap();
+
+    // 尽管子线程中修改为了3，我们在这里依然拥有main线程中的局部值：2
+    FOO.with(|f| {
+        assert_eq!(*f.borrow(), 2);
+    });
 }
