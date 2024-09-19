@@ -1,18 +1,23 @@
+use std::sync::{Arc, Barrier};
 use std::thread;
-use std::time::Duration;
+
 fn main() {
-    // 创建一个线程A
-    let new_thread = thread::spawn(move || {
-        // 再创建一个线程B
-        thread::spawn(move || loop {
-            println!("I am a new thread.");
-        })
-    });
+    // 类似于java里的CyclicBarrier
+    // 以及golang三方库里的CyclicBarrier
+    // https://github.com/marusama/cyclicbarrier.git
+    let mut handles = Vec::with_capacity(6);
+    let barrier = Arc::new(Barrier::new(6));
 
-    // 等待新创建的线程执行完成
-    new_thread.join().unwrap();
-    println!("Child thread is finish!");
+    for _ in 0..6 {
+        let b = barrier.clone();
+        handles.push(thread::spawn(move || {
+            println!("before wait");
+            b.wait();
+            println!("after wait");
+        }));
+    }
 
-    // 睡眠一段时间，看子线程创建的子线程是否还在运行
-    thread::sleep(Duration::from_millis(100));
+    for handle in handles {
+        handle.join().unwrap();
+    }
 }
