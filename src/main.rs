@@ -20,6 +20,7 @@ fn main() {
         handle.join().unwrap();
     }
     // 一旦所有子线程结束，收集它们的线程局部变量中的计数器值，然后进行求和
+    // 该库不仅仅使用了值的拷贝，而且还能自动把多个拷贝汇总到一个迭代器中，最后进行求和，非常好用。
     let tls = Arc::try_unwrap(tls).unwrap();
     let total = tls.into_iter().fold(0, |x, y| {
         // 打印每个线程局部变量中的计数器值，发现不一定有5个线程，
