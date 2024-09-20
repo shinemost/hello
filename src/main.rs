@@ -1,12 +1,18 @@
 use std::cell::RefCell;
+use std::thread::LocalKey;
 
-struct Foo;
-impl Foo {
-    thread_local! {
-        static FOO: RefCell<usize> = RefCell::new(0);
+thread_local! {
+    static FOO: RefCell<usize> = RefCell::new(0);
+}
+struct Bar {
+    foo: &'static LocalKey<RefCell<usize>>,
+}
+impl Bar {
+    fn constructor() -> Self {
+        Self { foo: &FOO }
     }
 }
-
 fn main() {
-    Foo::FOO.with(|x| println!("{:?}", x));
+    let bar = Bar::constructor();
+    bar.foo.with(|x| println!("{:?}", x));
 }
