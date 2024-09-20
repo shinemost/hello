@@ -1,34 +1,19 @@
-use std::{cell::Cell, sync::Arc, thread};
-use thread_local::ThreadLocal;
+use std::sync::mpsc;
+use std::thread;
 
 fn main() {
-    let tls = Arc::new(ThreadLocal::new());
-    let mut v = vec![];
-    // 创建多个线程
-    for _ in 0..5 {
-        let tls2 = tls.clone();
-        let handle = thread::spawn(move || {
-            // 将计数器加1
-            // 请注意，由于线程 ID 在线程退出时会被回收，因此一个线程有可能回收另一个线程的对象
-            // 这只能在线程退出后发生，因此不会导致任何竞争条件
-            let cell = tls2.get_or(|| Cell::new(0));
-            cell.set(cell.get() + 1);
-        });
-        v.push(handle);
-    }
-    for handle in v {
-        handle.join().unwrap();
-    }
-    // 一旦所有子线程结束，收集它们的线程局部变量中的计数器值，然后进行求和
-    // 该库不仅仅使用了值的拷贝，而且还能自动把多个拷贝汇总到一个迭代器中，最后进行求和，非常好用。
-    let tls = Arc::try_unwrap(tls).unwrap();
-    let total = tls.into_iter().fold(0, |x, y| {
-        // 打印每个线程局部变量中的计数器值，发现不一定有5个线程，
-        // 因为一些线程已退出，并且其他线程会回收退出线程的对象
-        println!("x: {}, y: {}", x, y.get());
-        x + y.get()
+    // 创建一个消息通道, 返回一个元组：(发送者，接收者)
+    let (tx, rx) = mpsc::channel();
+
+    // 创建线程，并发送消息
+    thread::spawn(move || {
+        // 发送一个数字1, send方法返回Result<T,E>，通过unwrap进行快速错误处理
+        tx.send(1).unwrap();
+
+        // 下面代码将报错，因为编译器自动推导出通道传递的值是i32类型，那么Option<i32>类型将产生不匹配错误
+        // tx.send(Some(1)).unwrap()
     });
 
-    // 和为5
-    assert_eq!(total, 5);
+    // 在主线程中接收子线程发送的消息并输出
+    println!("receive {}", rx.recv().unwrap());
 }
