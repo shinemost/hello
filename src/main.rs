@@ -3,16 +3,16 @@ use std::thread;
 
 fn main() {
     let (tx, rx) = mpsc::channel();
-
+    let tx1 = tx.clone();
     thread::spawn(move || {
-        // String存储在堆上，没有实现Copy特征，直接会移交所有权
-        // let s = String::from("我，飞走咯!");
-        // 如果实现了Copy特征，会直接复制
-        let s = 1;
-        tx.send(s).unwrap();
-        println!("val is {}", s);
+        tx.send(String::from("hi from raw tx")).unwrap();
     });
 
-    let received = rx.recv().unwrap();
-    println!("Got: {}", received);
+    thread::spawn(move || {
+        tx1.send(String::from("hi from cloned tx")).unwrap();
+    });
+
+    for received in rx {
+        println!("Got: {}", received);
+    }
 }
