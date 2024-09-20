@@ -15,5 +15,8 @@ fn main() {
     });
 
     // 在主线程中接收子线程发送的消息并输出
-    println!("receive {}", rx.recv().unwrap());
+    // 会阻塞主线程，直到收到信息
+    // println!("receive {}", rx.recv().unwrap());
+    // 尝试接收一次消息，该方法并不会阻塞线程，当通道中没有消息时，它会立刻返回一个错误
+    println!("receive {:?}", rx.try_recv());
 }
