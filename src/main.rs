@@ -1,18 +1,19 @@
-use std::sync::mpsc;
 use std::thread;
-
 fn main() {
-    let (tx, rx) = mpsc::channel();
-    let tx1 = tx.clone();
-    thread::spawn(move || {
-        tx.send(String::from("hi from raw tx")).unwrap();
-    });
+    start_n_threads();
+}
+pub fn start_n_threads() {
+    const N: isize = 10;
 
-    thread::spawn(move || {
-        tx1.send(String::from("hi from cloned tx")).unwrap();
-    });
+    let handles: Vec<_> = (0..N)
+        .map(|i| {
+            thread::spawn(move || {
+                println!("Hello from a thread{}!", i);
+            })
+        })
+        .collect();
 
-    for received in rx {
-        println!("Got: {}", received);
+    for handle in handles {
+        handle.join().unwrap();
     }
 }
