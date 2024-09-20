@@ -1,13 +1,13 @@
 use std::thread;
 fn main() {
-    start_one_thread_by_builder();
-}
-pub fn start_one_thread_by_builder() {
-    let builder = thread::Builder::new()
-        .name("test".to_string())
-        .stack_size(32 * 1024);
-
-    let handler = builder.spawn(|| println!("Hello from a thread!")).unwrap();
+    let handler = thread::Builder::new()
+        .name("named thread".into())
+        .spawn(|| {
+            // 获取当前执行的线程
+            let handle = thread::current();
+            assert_eq!(handle.name(), Some("named thread"));
+        })
+        .unwrap();
 
     handler.join().unwrap();
 }
