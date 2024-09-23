@@ -1,23 +1,43 @@
-use std::thread;
-use std::time::Duration;
+// pub fn wrong_start_threads_without_scoped() {
+//     let mut a = vec![1, 2, 3];
+//     let mut x = 0;
+//     thread::spawn(move || {
+//         println!("hello from the first scoped thread");
+//         // a的所有权已经被转移了
+//         dbg!(&a);
+//     });
+//     thread::spawn(move || {
+//         println!("hello from the second scoped thread");
+//         x += a[0] + a[2];
+//     });
+//     println!("hello from the main thread");
+//     // After the scope, we can modify and access our variables again:
+//     a.push(4);
+//     assert_eq!(x, a.len());
+// }
 
-pub fn thread_park2() {
-    let handle = thread::spawn(|| {
-        thread::sleep(Duration::from_millis(1000));
-        thread::park();
-        // 后面的park会阻塞并且不能被释放
-        thread::park();
-        thread::park();
-        println!("Hello from a park thread in case of unpark first!");
+use std::thread;
+
+pub fn start_scoped_threads() {
+    let mut a = vec![1, 2, 3];
+    let mut x = 0;
+    // 它可以借用 scope 外部的非 ‘static’ 数据。使用 thread::scope 函数提供的 Scope 的参数，可以创建 (spawn) scoped thread。
+    // 创 建出来的 scoped thread 如果没有手工调用 join , 在这个函数返回前会自动 join
+    thread::scope(|s| {
+        s.spawn(|| {
+            println!("hello from the first scoped thread");
+            dbg!(&a);
+        });
+        s.spawn(|| {
+            println!("hello from the second scoped thread");
+            x += a[0] + a[2];
+        });
+        println!("hello from the main thread");
     });
-    // 如果预先调用一股脑的 unpark 多次，然后再一股脑的调用 park 行不行
-    // 答案是不行。因为一个线程只有一个令牌，这个令牌或者存在或者只有一个，
-    // 多次调用 unpark 也是针对一个令牌进行的的操作，上面的代码会导致新建的那个线程一直处于 parked 状态。
-    handle.thread().unpark();
-    handle.thread().unpark();
-    handle.thread().unpark();
-    handle.join().unwrap();
+    // After the scope, we can modify and access our variables again:
+    a.push(4);
+    assert_eq!(x, a.len());
 }
 fn main() {
-    thread_park2();
+    start_scoped_threads();
 }
