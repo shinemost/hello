@@ -1,23 +1,56 @@
 use std::thread;
-use std::time::Duration;
-use thread_control::make_pair;
+use thread_priority::{set_current_thread_priority, ThreadBuilder, ThreadBuilderExt, ThreadPriority};
 
-pub fn control_thread() {
-    let (flag, control) = make_pair();
-    let handle = thread::spawn(move || {
-        while flag.alive() {
-            thread::sleep(Duration::from_millis(100));
-            println!("I'm alive!");
-        }
+pub fn start_thread_with_priority() {
+    let handle1 = thread::spawn(|| {
+        assert!(set_current_thread_priority(ThreadPriority::Min).is_ok());
+        println!("Hello from a thread5!");
     });
-    thread::sleep(Duration::from_millis(100));
-    assert_eq!(control.is_done(), false);
-    control.stop(); // Also you can `control.interrupt()` it
-    handle.join().unwrap();
-    assert_eq!(control.is_interrupted(), false);
-    assert_eq!(control.is_done(), true);
-    println!("This thread is stopped")
+    let handle2 = thread::spawn(|| {
+        assert!(set_current_thread_priority(ThreadPriority::Max).is_ok());
+        println!("Hello from a thread6!");
+    });
+    handle1.join().unwrap();
+    handle2.join().unwrap();
 }
+
+// 使用ThreadBuilderExt扩展标准库的线程创建带上优先级选项
+pub fn thread_builder_std() {
+    let thread = thread::Builder::new()
+        .name("MyNewThread".to_owned())
+        .spawn_with_priority(ThreadPriority::Max, |result| {
+            // This is printed out from within the spawned thread.
+            println!("Set priority result: {:?}", result);
+            assert!(result.is_ok());
+        }).unwrap();
+    thread.join().expect("TODO: panic message");
+}
+
+// 使用ThreadBuilder构建带有优先级的线程
+pub fn thread_builder() {
+    let thread = ThreadBuilder::default()
+        .name("MyThread")
+        .priority(ThreadPriority::Max)
+        .spawn(|result| {
+            // This is printed out from within the spawned thread.
+            println!("Set priority result: {:?}", result);
+            assert!(result.is_ok());
+        }).unwrap();
+    thread.join().expect("TODO: panic message");
+
+    // Another example where we don't care about the priority having been set.
+    let thread = ThreadBuilder::default()
+        .name("MyThread")
+        .priority(ThreadPriority::Max)
+        .spawn_careless(|| {
+            // This is printed out from within the spawned thread.
+            println!("We don't care about the priority result.");
+        }).unwrap();
+    thread.join().expect("TODO: panic message");
+}
+
 fn main() {
-    control_thread();
+    // start_thread_with_priority();
+    // thread_builder_std();
+    thread_builder();
 }
