@@ -1,5 +1,5 @@
 use std::thread;
-use thread_priority::{set_current_thread_priority, ThreadBuilder, ThreadBuilderExt, ThreadPriority};
+use thread_priority::{set_current_thread_priority, ThreadBuilder, ThreadBuilderExt, ThreadExt, ThreadPriority};
 
 pub fn start_thread_with_priority() {
     let handle1 = thread::spawn(|| {
@@ -23,6 +23,9 @@ pub fn thread_builder_std() {
             println!("Set priority result: {:?}", result);
             assert!(result.is_ok());
         }).unwrap();
+    assert!(thread::current().get_priority().is_ok());
+    println!("This thread's native id is: {:?}", thread::current().get_native_id());
+    println!("This thread's priority  is: {:?}", thread::current().get_priority().unwrap());
     thread.join().expect("TODO: panic message");
 }
 
@@ -51,6 +54,6 @@ pub fn thread_builder() {
 
 fn main() {
     // start_thread_with_priority();
-    // thread_builder_std();
-    thread_builder();
+    thread_builder_std();
+    // thread_builder();
 }
