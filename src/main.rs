@@ -58,6 +58,28 @@ pub fn crossbeam_scope() {
     assert_eq!(x, a.len())
 }
 
+// 使用三方库rayon实现同样的逻辑
+// 这个库比上面的crossbeam功能多些，使用的人也多
+// 还提供了 fifo 的 scope thread
+pub fn rayon_scope() {
+    let mut a = vec![1, 2, 3];
+    let mut x = 0;
+    rayon::scope(|s| {
+        // 使用传递的s可以继续创建孙线程
+        s.spawn(|_| {
+            println!("hello from the first rayon scoped thread");
+            dbg!(&a);
+        });
+        s.spawn(|_| {
+            println!("hello from the second rayon scoped thread");
+            x += a[0] + a[2];
+        });
+        println!("hello from the main thread");
+    });
+    a.push(4);
+    assert_eq!(x, a.len())
+}
+
 fn main() {
-    crossbeam_scope();
+    rayon_scope();
 }
