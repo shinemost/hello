@@ -1,6 +1,16 @@
 use crossbeam;
+use go_spawn::{go, go_ref, join, join_all};
 use send_wrapper::SendWrapper;
-use std::{ops::Deref, rc::Rc, sync::mpsc::channel, thread};
+use std::{
+    ops::Deref,
+    rc::Rc,
+    sync::{
+        atomic::{AtomicI64, Ordering},
+        mpsc::channel,
+        Arc,
+    },
+    thread,
+};
 
 pub fn panic_example() {
     println!("Hello, world!");
@@ -96,6 +106,33 @@ pub fn send_wrapper() {
     println!("received from the main thread: {}", value);
 }
 
+// 使用三方库go-spawn模拟golang的go开启协程语法
+pub fn go_thread() {
+    let counter = Arc::new(AtomicI64::new(0));
+
+    let counter_cloned = counter.clone();
+
+    // Spawn a thread that captures values by move.
+    go! {
+     for _ in 0..100 {
+       counter_cloned.fetch_add(1, Ordering::SeqCst);
+     }
+
+    }
+    assert!(join!().is_ok());
+    assert_eq!(counter.load(Ordering::SeqCst), 1200);
+}
+
+pub fn go_thread_2() {
+    static COUNTER: AtomicI64 = AtomicI64::new(0);
+    for _ in 0..10 {
+        // Spawn a thread that captures by reference.
+        go_ref!(COUNTER.fetch_add(1, Ordering::SeqCst));
+    }
+    join_all!();
+    assert_eq!(COUNTER.load(Ordering::SeqCst), 10);
+}
+
 fn main() {
-    send_wrapper();
+    go_thread_2();
 }
