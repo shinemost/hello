@@ -1,3 +1,4 @@
+use crossbeam;
 use std::thread;
 
 pub fn panic_example() {
@@ -35,6 +36,28 @@ pub fn panic_caught_example() {
     println!("Exiting main!")
 }
 
+// crossbeam 也提供了创建了 scoped thread 的功能，和标准库的 scope 功能类似，但
+// 是它创建的 scoped thread 可以继续创建 scoped thread:
+pub fn crossbeam_scope() {
+    let mut a = vec![1, 2, 3];
+    let mut x = 0;
+    crossbeam::scope(|s| {
+        // 使用传递的s可以继续创建孙线程
+        s.spawn(|_| {
+            println!("hello from the first crossbeam scoped thread");
+            dbg!(&a);
+        });
+        s.spawn(|_| {
+            println!("hello from the second crossbeam scoped thread");
+            x += a[0] + a[2];
+        });
+        println!("hello from the main thread");
+    })
+    .unwrap();
+    a.push(4);
+    assert_eq!(x, a.len())
+}
+
 fn main() {
-    panic_caught_example();
+    crossbeam_scope();
 }
