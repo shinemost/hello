@@ -1,59 +1,40 @@
 use std::thread;
-use thread_priority::{set_current_thread_priority, ThreadBuilder, ThreadBuilderExt, ThreadExt, ThreadPriority};
 
-pub fn start_thread_with_priority() {
-    let handle1 = thread::spawn(|| {
-        assert!(set_current_thread_priority(ThreadPriority::Min).is_ok());
-        println!("Hello from a thread5!");
+pub fn panic_example() {
+    println!("Hello, world!");
+    let h = thread::spawn(|| {
+        thread::sleep(std::time::Duration::from_millis(1000));
+        panic!("boom");
     });
-    let handle2 = thread::spawn(|| {
-        assert!(set_current_thread_priority(ThreadPriority::Max).is_ok());
-        println!("Hello from a thread6!");
-    });
-    handle1.join().unwrap();
-    handle2.join().unwrap();
+    let r = h.join();
+    //出现panic时会发生线程执行栈回退，运行结构器以及释放资源的操作。
+    // 如果panic没有捕获，那么线程就会退出
+    // 通过JoinHandle检查
+    match r {
+        Ok(r) => println!("All is well! {:?}", r),
+        Err(e) => println!("Got an error! {:?}", e),
+    }
+    println!("Exiting main!")
 }
 
-// 使用ThreadBuilderExt扩展标准库的线程创建带上优先级选项
-pub fn thread_builder_std() {
-    let thread = thread::Builder::new()
-        .name("MyNewThread".to_owned())
-        .spawn_with_priority(ThreadPriority::Max, |result| {
-            // This is printed out from within the spawned thread.
-            println!("Set priority result: {:?}", result);
-            assert!(result.is_ok());
-        }).unwrap();
-    assert!(thread::current().get_priority().is_ok());
-    println!("This thread's native id is: {:?}", thread::current().get_native_id());
-    println!("This thread's priority  is: {:?}", thread::current().get_priority().unwrap());
-    thread.join().expect("TODO: panic message");
-}
-
-// 使用ThreadBuilder构建带有优先级的线程
-pub fn thread_builder() {
-    let thread = ThreadBuilder::default()
-        .name("MyThread")
-        .priority(ThreadPriority::Max)
-        .spawn(|result| {
-            // This is printed out from within the spawned thread.
-            println!("Set priority result: {:?}", result);
-            assert!(result.is_ok());
-        }).unwrap();
-    thread.join().expect("TODO: panic message");
-
-    // Another example where we don't care about the priority having been set.
-    let thread = ThreadBuilder::default()
-        .name("MyThread")
-        .priority(ThreadPriority::Max)
-        .spawn_careless(|| {
-            // This is printed out from within the spawned thread.
-            println!("We don't care about the priority result.");
-        }).unwrap();
-    thread.join().expect("TODO: panic message");
+pub fn panic_caught_example() {
+    println!("Hello, world!");
+    let h = thread::spawn(|| {
+        thread::sleep(std::time::Duration::from_millis(1000));
+        // 如果被捕获，外部的 handle 是检查不到这个 panic 的：
+        let result = std::panic::catch_unwind(|| {
+            panic!("boom");
+        });
+        println!("panic caught, result = {}", result.is_err()); // true
+    });
+    let r = h.join();
+    match r {
+        Ok(r) => println!("All is well! {:?}", r), // here
+        Err(e) => println!("Got an error! {:?}", e),
+    }
+    println!("Exiting main!")
 }
 
 fn main() {
-    // start_thread_with_priority();
-    thread_builder_std();
-    // thread_builder();
+    panic_caught_example();
 }
