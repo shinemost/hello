@@ -155,6 +155,7 @@ dependencies = [
  "num_cpus",
  "num_threads",
  "rayon",
+ "send_wrapper",
  "thiserror",
  "thread-amount",
  "thread-control",
@@ -308,6 +309,12 @@ name = "semver"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "61697e0a1c7e512e84a621326239844a24d8207b4669b41bc18b32ea5cbf988b"
+
+[[package]]
+name = "send_wrapper"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd0b0ec5f1c1ca621c432a25813d8d60c88abe6d3e08a3eb9cf37d97a0fe3d73"
 
 [[package]]
 name = "syn"

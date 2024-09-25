@@ -1,5 +1,6 @@
 use crossbeam;
-use std::thread;
+use send_wrapper::SendWrapper;
+use std::{ops::Deref, rc::Rc, sync::mpsc::channel, thread};
 
 pub fn panic_example() {
     println!("Hello, world!");
@@ -80,6 +81,21 @@ pub fn rayon_scope() {
     assert_eq!(x, a.len())
 }
 
+pub fn send_wrapper() {
+    let wrapped_value = SendWrapper::new(Rc::new(42));
+
+    let (sender, receiver) = channel();
+
+    let _t = thread::spawn(move || {
+        sender.send(wrapped_value).unwrap();
+    });
+
+    let wrapped_value = receiver.recv().unwrap();
+
+    let value = wrapped_value.deref();
+    println!("received from the main thread: {}", value);
+}
+
 fn main() {
-    rayon_scope();
+    send_wrapper();
 }
